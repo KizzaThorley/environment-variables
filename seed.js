@@ -15,7 +15,8 @@ async function seed() {
     console.log('connection succesefull ');
 
     console.log(process.env.MONGODB_URL);
-
+ // await mongoose.connection.db.dropDatabase()
+ //! line above clears the database 
     const snack = await Snack.create({
         name: 'popcorn',
         rating: 5,

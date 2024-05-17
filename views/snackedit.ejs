@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <%- include('./partials/nav') %>
+        <h1>
+            <%=snack.name%>
+        </h1>
+        <li>Raiting = <%=snack.rating%>
+        </li>
+        <li>Price = £<%=snack.cost%>
+        </li>
+        <% if(snack.eaten) { %>
+            <li>🍽️</li>
+            <% } else { %>
+                <li>🎂</li>
+                <% } %>
+
+                <form action="/snack/<%=snack._id%>?_method=PUT" method="POST">
+                    <label for="name">Name:</label>
+                    <input type="text" name="name" id ="name" value="<%=snack.name%>"">
+                    
+                    <label for="rating">Raiting:</label>
+                    <input type="text" name="rating" id ="rating" value="<%=snack.rating%>">
+                    
+                    <label for="cost"> cost:</label>
+                    <input type="text" name="cost" id ="cost" value="<%=snack.cost%>">"
+                    
+                    <label for="eaten">Eaten:</label>
+                    <input type="checkbox" name="eaten" id="eaten" <% if (snack.eaten) { %>checked<% } %> >
+                    <button type="submit">Update Snack</button>
+                  </form>
+                  <a href="/snacks">Back to Snacks</a>
+
+
+
+  
+</html>

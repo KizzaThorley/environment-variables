@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <%- include('./partials/nav') %>
+        <h1>
+            <%=snack.name%>
+        </h1>
+        <li>Raiting = <%=snack.rating%>
+        </li>
+        <li>Price = £<%=snack.cost%>
+        </li>
+        <% if(snack.eaten) { %>
+            <li>🍽️</li>
+            <% } else { %>
+                <li>🎂</li>
+                <% } %>
+
+                <form action="/snacks/<%=snack.id%>?_method=DELETE" method="POST">
+                    <button type="submit">Delete <%= snack.name %></button>
+                  </form>
+
+                  <a href="/snack/<%= snack.id %>/edit">Edit <%= snack.name %></a> 
+                  <br>
+
+                  <a href="/snacks">Back to Snacks</a>
+
+</html>
