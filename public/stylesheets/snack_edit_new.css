@@ -1,3 +1,62 @@
 body {
-    background-color: lightgray;
+    background-color:darkcyan;
+    display: flex;
+    text-align: center;
+    flex-direction: column;
+    color: whitesmoke;
 }
+
+nav {
+    display: flex;
+  justify-content: center;
+
+}
+.nav-bar {
+    display: flex;
+    width: 400px;
+    justify-content: space-between;
+}
+
+a {
+    color: whitesmoke;
+    text-decoration: none;
+}
+
+  li {
+    list-style-type: none;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            text-decoration: underline flase;
+        
+        
+          
+  }
+
+  .link {
+    background-color: rgb(0, 26, 255);
+    margin: 5px 0;
+    border-radius: 20px;
+    border: 2px solid black;
+    padding: 10px;
+    width: auto;
+    cursor: pointer;
+    text-align: center; 
+}
+  div{
+ display: flex;
+ flex-wrap: wrap;
+ justify-content: center;
+ align-items: center;
+ margin: auto;
+ text-align: center;
+
+  }
+  button{
+    color: whitesmoke;
+    margin: 5px 0;
+    border-radius: 20px; 
+    border: 2px solid black;
+    padding: 10px;
+    background-color: rgb(0, 26, 255);
+  }

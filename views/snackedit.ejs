@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%=snack.name%></title>
-    <link rel="stylesheet" href="/stylesheets/snack_edit_new.css"
+    <link rel="stylesheet" href="/stylesheets/snack_edit_new.css">
 </head>
 
 <body>
@@ -37,8 +37,9 @@
                     <input type="checkbox" name="eaten" id="eaten" <% if (snack.eaten) { %>checked<% } %> >
                     <button type="submit">Update Snack</button>
                   </form>
-                  <a href="/snacks">Back to Snacks</a>
-
+                  <div>
+                  <a class="link" href="/snacks">Back to Snacks</a>
+</div>
 
 
   

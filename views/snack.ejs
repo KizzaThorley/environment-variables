@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title> <%=snack.name%> </title>
-    <link rel="stylesheet" href="/stylesheets/snack.css"
+    <link rel="stylesheet" href="/stylesheets/snack.css">
 </head>
 
 <body>
@@ -26,10 +26,10 @@
                 <form action="/snacks/<%=snack.id%>?_method=DELETE" method="POST">
                     <button type="submit">Delete <%= snack.name %></button>
                   </form>
+ <div>
+                  <a class="link" href="/snack/<%= snack.id %>/edit">Edit <%= snack.name %></a> 
+                 
 
-                  <a href="/snack/<%= snack.id %>/edit">Edit <%= snack.name %></a> 
-                  <br>
-
-                  <a href="/snacks">Back to Snacks</a>
-
+                  <a class="link" href="/snacks">Back to Snacks</a>
+                </div>
 </html>

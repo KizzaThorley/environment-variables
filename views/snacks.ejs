@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Snacks List</title>
-    <link rel="stylesheet" href="/stylesheets/snacks.css"
+    <link rel="stylesheet" href="/stylesheets/snacks.css">
 </head>
 <body>
     <%- include('./partials/nav') %>
     <h1>Snacks List 🤤</h1>
     <% snacks.forEach(snack => { %>
-        <li><a href="/snacks/<%=snack.id %>"><%=snack.name %></a></li>
+        <li>
+            <a class="link" href="/snacks/<%=snack.id %>"><%=snack.name %></a>
+        </li>
    <% }); %>
 </body>
 </html>
