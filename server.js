@@ -1,98 +1,118 @@
 require('dotenv').config();
 
 const express = require('express');
-const mongoose= require('mongoose')
+const mongoose = require('mongoose')
 const methodOverride = require("method-override"); // new
 const morgan = require("morgan"); //new
 const path = require('path')
 
 const port = 3000
 const app = express();
+const session = require('express-session')
 
-const Snacks = require('./models/snacks.js') 
+const Snacks = require('./models/snacks.js')
 
-app.use(express.urlencoded({ extended: false }));
-app.use(methodOverride("_method")); 
-app.use(morgan("dev"));
-app.use(express.static(path.join(__dirname, "public")))
+const authController = require('./controllers/auth.js')
 
 mongoose.connect(process.env.MONGODB_URL)
 
+app.use(express.urlencoded({ extended: false }));
+app.use(methodOverride("_method"));
+app.use(morgan("dev"));
+app.use(express.static(path.join(__dirname, "public")))
+
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+})
+);
+
+
+
+app.use('/auth', authController);
 
 app.get('/', (req, res) => {
-    res.render('home.ejs')
- 
+    res.render('home.ejs', {
+        user: req.session.user
+    })
+
 });
 
 
 
 app.get('/snacks', async (req, res) => {
- const snacks = await Snacks.find()
- 
- res.render('snacks.ejs', {
-snacks: snacks
- })
+    const snacks = await Snacks.find()
+
+    res.render('snacks.ejs', {
+        snacks: snacks,
+        user: req.session.user
+    })
 })
 
 app.get('/snacks/:snackId', async (req, res) => {
     const snack = await Snacks.findById(req.params.snackId)
-const snackId = req.params.snackName
+    const snackId = req.params.snackName
     res.render('snack.ejs', {
         snackId: snackId,
-        snack: snack
+        snack: snack,
+        user: req.session.user,
     })
 })
 
 app.get('/new-snack', (req, res) => {
-    res.render('newsnacks.ejs')
+    res.render('newsnacks.ejs', {
+        user: req.session.user,
+    })
 })
 
 app.get("/snack/:snackId/edit", async (req, res) => {
     const foundSnack = await Snacks.findById(req.params.snackId);
     res.render("snackedit.ejs", {
-      snack: foundSnack,
+        snack: foundSnack,
+        user: req.session.user,
     });
-  });
-  
+});
+
 
 
 //! tell express to expect some json in the request 
 app.use(express.json())
 
-app.use(express.urlencoded({ extended: false}))
+app.use(express.urlencoded({ extended: false }))
 
 app.post('/snacks', async (req, res) => {
     console.log(req.body);
     // let doesSnackExist = await Snacks.exists({name: req.body.name});
     let newSnack = req.body
 
-if(newSnack.eaten === 'on') {
-    delete newSnack.eaten
-    newSnack.eaten = true
-} else {
-    delete newSnack.eaten
-    newSnack.eaten = false
-}
+    if (newSnack.eaten === 'on') {
+        delete newSnack.eaten
+        newSnack.eaten = true
+    } else {
+        delete newSnack.eaten
+        newSnack.eaten = false
+    }
 
-const snack = await Snacks.create(newSnack)
-//     if(doesSnackExist) {
-//       res.send('Already one of my snacks')
-// } else {
-//     const snack = await Snacks.create(req.body)
-//     res.send(snack)
+    const snack = await Snacks.create(newSnack)
+    //     if(doesSnackExist) {
+    //       res.send('Already one of my snacks')
+    // } else {
+    //     const snack = await Snacks.create(req.body)
+    //     res.send(snack)
 
-//     }
-res.redirect('/snacks')
+    //     }
+    res.redirect('/snacks')
 
 })
 
 app.delete('/snacks', async (req, res) => {
 
-const snacks = await Snacks.deleteOne(req.body)
+    const snacks = await Snacks.deleteOne(req.body)
 
-res.send(snacks)
+    res.send(snacks)
 })
-app.delete('/snacks/:snackId' , async (req, res) => {
+app.delete('/snacks/:snackId', async (req, res) => {
     const deletedSnack = await Snacks.findByIdAndDelete(req.params.snackId)
 
     res.redirect('/snacks')
@@ -102,7 +122,7 @@ app.delete('/snacks/:snackId' , async (req, res) => {
 // app.put('/snacks', async (req, res) => {
 //     const snacks = await Snacks.updateOne(req.body, {rating: 2})
 
-    // res.redirect(``)
+// res.redirect(``)
 
 // })
 
@@ -119,11 +139,11 @@ app.put('/snack/:snackId', async (req, res) => {
 
     if (req.body.eaten === "on") {
         req.body.eaten = true;
-      } else {
+    } else {
         req.body.eaten = false;
-      }
+    }
 
-      await Snacks.findByIdAndUpdate(req.params.snackId, req.body);
+    await Snacks.findByIdAndUpdate(req.params.snackId, req.body);
 
     res.redirect(`/snacks/${req.params.snackId}`)
 
@@ -138,12 +158,12 @@ app.put('/snack/:snackId', async (req, res) => {
 //      } else return 
 //     })
 //     res.redirect(`/snack/${matchedSnack.id}`)
-   
+
 //    })
 
-   
+
 
 app.listen(port, () => {
-  console.log('Listening on port 3000');
+    console.log('Listening on port 3000');
 });
 
