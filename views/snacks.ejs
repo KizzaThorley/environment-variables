@@ -14,5 +14,9 @@
             <a class="link" href="/snacks/<%=snack.id %>"><%=snack.name %></a>
         </li>
    <% }); %>
+
+   <% if (typeof message !== 'undefined') { %>
+    <p><%= message %></p>
+  <% } %>
 </body>
 </html>

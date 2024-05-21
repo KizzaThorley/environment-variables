@@ -25,22 +25,19 @@
 
                 <form action="/snack/<%=snack._id%>?_method=PUT" method="POST">
                     <label for="name">Name:</label>
-                    <input type="text" name="name" id ="name" value="<%=snack.name%>"">
+                    <input type="text" name="name" id ="name" value="<%=snack.name%>" required>
                     
                     <label for="rating">Raiting:</label>
-                    <input type="text" name="rating" id ="rating" value="<%=snack.rating%>">
+                    <input type="text" name="rating" id ="rating" value="<%=snack.rating%>" required>
                     
                     <label for="cost"> cost:</label>
-                    <input type="text" name="cost" id ="cost" value="<%=snack.cost%>">"
+                    <input type="text" name="cost" id ="cost" value="<%=snack.cost%>" required>
                     
                     <label for="eaten">Eaten:</label>
-                    <input type="checkbox" name="eaten" id="eaten" <% if (snack.eaten) { %>checked<% } %> >
+                    <input type="checkbox" name="eaten" id="eaten" <% if (snack.eaten) { %>checked<% } %>  required>
                     <button type="submit">Update Snack</button>
                   </form>
                   <div>
                   <a class="link" href="/snacks">Back to Snacks</a>
 </div>
-
-
-  
 </html>

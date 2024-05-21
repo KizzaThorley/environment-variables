@@ -11,16 +11,16 @@
     <h1>Add New Snacks</h1>
     <form action="/snacks" method="POST">
  <label for="name">Name:</label>
-<input type="text" name="name" id ="name">
+<input type="text" name="name" id ="name" required>
 
 <label for="rating">Raiting:</label>
-<input type="text" name="rating" id ="rating">
+<input type="text" name="rating" id ="rating" required>
 
 <label for="cost"> cost:</label>
-<input type="text" name="cost" id ="cost">
+<input type="text" name="cost" id ="cost" required>
 
 <label for="eaten">Eaten:</label>
-<input type="checkbox" name="eaten" id="eaten">
+<input type="checkbox" name="eaten" id="eaten" >
 
 <button type="submit">Add Snack</button>
 

@@ -6,7 +6,7 @@ const methodOverride = require("method-override"); // new
 const morgan = require("morgan"); //new
 const path = require('path')
 
-const port = 3000
+const port = process.env.PORT ? process.env.PORT : 3000;
 const app = express();
 const session = require('express-session')
 
@@ -14,7 +14,7 @@ const Snacks = require('./models/snacks.js')
 
 const authController = require('./controllers/auth.js')
 
-mongoose.connect(process.env.MONGODB_URL)
+mongoose.connect(process.env.MONGODB_URI)
 
 app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride("_method"));
@@ -27,7 +27,14 @@ app.use(session({
     saveUninitialized: true,
 })
 );
-
+app.use((req, res, next) => {
+    if (req.session.message) {
+      res.locals.message = req.session.message;
+      req.session.message = null;
+    }
+    next();
+  });
+  
 
 
 app.use('/auth', authController);
@@ -82,28 +89,28 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
 app.post('/snacks', async (req, res) => {
-    console.log(req.body);
-    // let doesSnackExist = await Snacks.exists({name: req.body.name});
+try {
+    // let doesSnackExist = await Snacks.findOne({name: req.body.name});
+// if (req.body.name === doesSnackExist.name) {
+//     return res.send(`Snack exists`)
+// } else {
     let newSnack = req.body
+    
 
     if (newSnack.eaten === 'on') {
-        delete newSnack.eaten
         newSnack.eaten = true
     } else {
-        delete newSnack.eaten
         newSnack.eaten = false
     }
 
-    const snack = await Snacks.create(newSnack)
-    //     if(doesSnackExist) {
-    //       res.send('Already one of my snacks')
-    // } else {
-    //     const snack = await Snacks.create(req.body)
-    //     res.send(snack)
-
-    //     }
+   await Snacks.create(newSnack)
+   req.session.message = "Snack successfully created."
     res.redirect('/snacks')
-
+// } 
+} catch (err) {
+    req.session.message = err.message;
+    res.redirect('/snacks')
+}
 })
 
 app.delete('/snacks', async (req, res) => {
@@ -162,6 +169,30 @@ app.put('/snack/:snackId', async (req, res) => {
 //    })
 
 
+app.get('/vip-lounge', (req, res) => {
+    if (req.session.user) {
+        res.send(`Welcome to the VIP lounge ${req.session.user.username}`)
+    } else {
+        res.send('No Guests allowed')
+    }
+})
+
+
+// this routes any 404 errors to a 404 error page
+// app.get('*', function (req, res) {
+//     res.render('error.ejs', { 
+//         msg: 'Page not found!',
+//         user: req.session.user,
+//      });
+//   });
+app.get('*', function (req, res) {
+    res.status(404).render('error.ejs', {
+      msg: 'Route not found!',
+      user: req.session.user,
+    });
+  });
+  
+  
 
 app.listen(port, () => {
     console.log('Listening on port 3000');
