@@ -12,7 +12,8 @@ const session = require('express-session')
 
 const Snacks = require('./models/snacks.js')
 
-const authController = require('./controllers/auth.js')
+const authController = require('./controllers/auth.js');
+const { ppid } = require('process');
 
 mongoose.connect(process.env.MONGODB_URI)
 
@@ -25,60 +26,98 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
+    cookie: { secure: false },
 })
 );
 app.use((req, res, next) => {
     if (req.session.message) {
-      res.locals.message = req.session.message;
-      req.session.message = null;
+        res.locals.message = req.session.message;
+        req.session.message = null;
     }
     next();
-  });
-  
+});
+
+app.use(function (req, res, next) {
+    res.locals.user = req.session.user;
+    next();
+});
+
 
 
 app.use('/auth', authController);
 
 app.get('/', (req, res) => {
-    res.render('home.ejs', {
-        user: req.session.user
-    })
+    try {
+        res.render('home.ejs')
+    } catch (error) {
+        res.render('error.ejs', {
+            error: error.message,
+        })
+    }
 
 });
 
 
 
 app.get('/snacks', async (req, res) => {
-    const snacks = await Snacks.find()
+    try {
+        const snacks = await Snacks.find()
 
-    res.render('snacks.ejs', {
-        snacks: snacks,
-        user: req.session.user
-    })
+        res.render('snacks.ejs', {
+            snacks: snacks,
+        })
+    } catch (error) {
+        res.render('error.ejs', {
+            error: error.message,
+        })
+    }
 })
 
 app.get('/snacks/:snackId', async (req, res) => {
-    const snack = await Snacks.findById(req.params.snackId)
-    const snackId = req.params.snackName
-    res.render('snack.ejs', {
-        snackId: snackId,
-        snack: snack,
-        user: req.session.user,
-    })
+    try {
+        const snack = await Snacks.findById(req.params.snackId)
+        const snackId = req.params.snackName
+        res.render('snack.ejs', {
+            snackId: snackId,
+            snack: snack,
+        })
+    } catch (error) {
+        res.render('error.ejs', {
+            error: error.message,
+        })
+    }
 })
 
 app.get('/new-snack', (req, res) => {
-    res.render('newsnacks.ejs', {
-        user: req.session.user,
-    })
+    if (req.session.user) {
+        try {
+            res.render('newsnacks.ejs')
+        } catch (error) {
+            res.render('error.ejs', {
+                error: error.message,
+            })
+        }
+    } else {
+        res.redirect('auth/sign-in')
+    }
 })
 
 app.get("/snack/:snackId/edit", async (req, res) => {
-    const foundSnack = await Snacks.findById(req.params.snackId);
-    res.render("snackedit.ejs", {
-        snack: foundSnack,
-        user: req.session.user,
-    });
+    if (req.session.user) {
+        try {
+            const foundSnack = await Snacks.findById(req.params.snackId);
+            res.render("snackedit.ejs", {
+                snack: foundSnack,
+            });
+        } catch (error) {
+            res.render('error.ejs', {
+                error: error.message,
+            })
+        }
+    } else {
+        res.redirect('auth/sign-in')
+    }
+
 });
 
 
@@ -89,28 +128,40 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
 app.post('/snacks', async (req, res) => {
-try {
-    // let doesSnackExist = await Snacks.findOne({name: req.body.name});
-// if (req.body.name === doesSnackExist.name) {
-//     return res.send(`Snack exists`)
-// } else {
-    let newSnack = req.body
-    
+    if (req.session.user) {
+        try {
+            if (!req.body.name.trim()) {
+                throw new Error('invalid input; the name field cannot be empty')
+            }
+            if (!req.body.rating.trim()) {
+                throw new Error('invalid input; the rating field cannot be empty')
+            }
+            if (!req.body.cost.trim()) {
+                throw new Error('invalid input; the cost field cannot be empty')
+            }
+            // let doesSnackExist = await Snacks.findOne({name: req.body.name});
+            // if (req.body.name === doesSnackExist.name) {
+            //     return res.send(`Snack exists`)
+            // } else {
+            let newSnack = req.body
 
-    if (newSnack.eaten === 'on') {
-        newSnack.eaten = true
+            if (newSnack.eaten === 'on') {
+                newSnack.eaten = true
+            } else {
+                newSnack.eaten = false
+            }
+
+            await Snacks.create(newSnack)
+            req.session.message = "Snack successfully created."
+            res.redirect('/snacks')
+            // } 
+        } catch (err) {
+            req.session.message = err.message;
+            res.redirect('/snacks')
+        }
     } else {
-        newSnack.eaten = false
+        res.redirect('/auth/sign-in')
     }
-
-   await Snacks.create(newSnack)
-   req.session.message = "Snack successfully created."
-    res.redirect('/snacks')
-// } 
-} catch (err) {
-    req.session.message = err.message;
-    res.redirect('/snacks')
-}
 })
 
 app.delete('/snacks', async (req, res) => {
@@ -126,47 +177,37 @@ app.delete('/snacks/:snackId', async (req, res) => {
 })
 
 
-// app.put('/snacks', async (req, res) => {
-//     const snacks = await Snacks.updateOne(req.body, {rating: 2})
-
-// res.redirect(``)
-
-// })
-
-// app.get('/snacks/:snackId', async (req, res) =>{
-//     console.log(req.params.snackId);
-// const snack = await Snacks.findById(req.params.snackId)
-
-
-// res.send(snack)
-// })
-
 
 app.put('/snack/:snackId', async (req, res) => {
+    try {
+        if (req.body.eaten === "on") {
+            req.body.eaten = true;
+        } else {
+            req.body.eaten = false;
+        }
+        if (!req.body.name.trim()) {
+            throw new Error('invalid input; the name field cannot be empty')
+        }
+        if (!req.body.rating.trim()) {
+            throw new Error('invalid input; the rating field cannot be empty')
+        }
+        if (!req.body.cost.trim()) {
+            throw new Error('invalid input; the cost field cannot be empty')
+        }
+        await Snacks.findByIdAndUpdate(req.params.snackId, req.body);
 
-    if (req.body.eaten === "on") {
-        req.body.eaten = true;
-    } else {
-        req.body.eaten = false;
+        res.redirect(`/snacks/${req.params.snackId}`)
+    } catch (err) {
+        req.session.message = err.message;
+        res.redirect(`/snack/${req.params.snackId}/edit`, {
+            errorMessage: err.message,
+        })
     }
 
-    await Snacks.findByIdAndUpdate(req.params.snackId, req.body);
 
-    res.redirect(`/snacks/${req.params.snackId}`)
 
-})
+});
 
-// app.get('/snacks/search/:snackName', async (req, res) => {
-//     const snacks = await Snacks.find()
-//     let matchedSnack = []
-//    snacks.forEach( async (snack) =>{ 
-//         if(snack.name === req.params.snackName) {
-//          matchedSnack.push(snack)
-//      } else return 
-//     })
-//     res.redirect(`/snack/${matchedSnack.id}`)
-
-//    })
 
 
 app.get('/vip-lounge', (req, res) => {
@@ -187,14 +228,21 @@ app.get('/vip-lounge', (req, res) => {
 //   });
 app.get('*', function (req, res) {
     res.status(404).render('error.ejs', {
-      msg: 'Route not found!',
-      user: req.session.user,
+        msg: 'Route not found!',
     });
-  });
-  
-  
+});
+
+
+
+const handleServerError = (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.log(`Warning! Port ${port} is already in use!`);
+    } else {
+        console.log('Error:', err);
+    }
+}
 
 app.listen(port, () => {
-    console.log('Listening on port 3000');
-});
+    console.log(`The express app is ready on port ${port}!`);
+}).on('error', handleServerError);
 

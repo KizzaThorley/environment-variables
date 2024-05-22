@@ -28,7 +28,7 @@
                     <input type="text" name="name" id ="name" value="<%=snack.name%>" required>
                     
                     <label for="rating">Raiting:</label>
-                    <input type="text" name="rating" id ="rating" value="<%=snack.rating%>" required>
+                    <input type="text" name="rating" id ="rating" value="<%=snack.rating%>">
                     
                     <label for="cost"> cost:</label>
                     <input type="text" name="cost" id ="cost" value="<%=snack.cost%>" required>
@@ -37,6 +37,9 @@
                     <input type="checkbox" name="eaten" id="eaten" <% if (snack.eaten) { %>checked<% } %>  required>
                     <button type="submit">Update Snack</button>
                   </form>
+                  <% if (typeof errorMessage !== 'undefined') { %>
+                    <p><%= errorMessage %></p>
+                    <% } %>
                   <div>
                   <a class="link" href="/snacks">Back to Snacks</a>
 </div>
